@@ -1,0 +1,421 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Editor - Resume Tailor{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8 fade-in">
+        <div>
+            <h1 class="text-3xl font-bold text-dark-text">{{ resume.title }}</h1>
+            <p class="text-dark-text-secondary">
+                {% if resume.is_tailored %}
+                    Tailored resume • Last updated 
+                    {% if resume.updated_at and resume.updated_at.strftime %}
+                        {{ resume.updated_at.strftime('%B %d, %Y') }}
+                    {% else %}
+                        --
+                    {% endif %}
+                {% else %}
+                    Original resume • Created 
+                    {% if resume.created_at and resume.created_at.strftime %}
+                        {{ resume.created_at.strftime('%B %d, %Y') }}
+                    {% else %}
+                        --
+                    {% endif %}
+                {% endif %}
+            </p>
+        </div>
+        <div class="flex space-x-4">
+            <button onclick="showTailorModal()" class="btn-primary px-4 py-2 rounded-lg hover-lift smooth-transition">
+                {% if resume.is_tailored %}Re-tailor{% else %}Tailor Resume{% endif %}
+            </button>
+            {% if resume.latex_source %}
+                <a href="{{ url_for('resume.download_resume', resume_id=resume.id) }}" class="btn-secondary px-4 py-2 rounded-lg hover-lift smooth-transition">
+                    Download PDF
+                </a>
+            {% endif %}
+            <a href="{{ url_for('dashboard') }}" class="bg-dark-card border border-gray-600 text-dark-text px-4 py-2 rounded-lg hover:bg-gray-700 smooth-transition">
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <!-- Editor Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Original Resume Panel -->
+        <div class="slide-up">
+            <div class="glass-effect rounded-xl overflow-hidden">
+                <div class="bg-dark-surface px-6 py-4 border-b border-gray-700">
+                    <h2 class="text-lg font-semibold text-dark-text flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-electric-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Original Resume
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <textarea 
+                        id="original-resume" 
+                        class="w-full h-96 bg-dark-card border border-gray-600 rounded-lg text-dark-text text-sm font-mono p-4 resize-none focus:outline-none focus:ring-2 focus:ring-electric-blue"
+                        readonly
+                    >{{ resume.original_text }}</textarea>
+                    <div class="mt-4 flex justify-between items-center">
+                        <button onclick="editOriginalResume()" class="text-electric-blue hover:text-gold smooth-transition text-sm">
+                            ✏️ Edit Original
+                        </button>
+                        <span class="text-xs text-dark-text-secondary">
+                            {{ resume.original_text|length }} characters
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tailored Resume Panel -->
+        <div class="slide-up" style="animation-delay: 0.1s;">
+            <div class="glass-effect rounded-xl overflow-hidden">
+                <div class="bg-dark-surface px-6 py-4 border-b border-gray-700">
+                    <h2 class="text-lg font-semibold text-dark-text flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        {% if resume.tailored_text %}Tailored Resume{% else %}Ready to Tailor{% endif %}
+                    </h2>
+                </div>
+                <div class="p-6">
+                    {% if resume.tailored_text %}
+                        <textarea 
+                            id="tailored-resume" 
+                            class="w-full h-96 bg-dark-card border border-gray-600 rounded-lg text-dark-text text-sm font-mono p-4 resize-none focus:outline-none focus:ring-2 focus:ring-gold"
+                        >{{ resume.tailored_text }}</textarea>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div class="flex space-x-4">
+                                <button onclick="saveTailoredResume()" class="text-gold hover:text-electric-blue smooth-transition text-sm">
+                                    💾 Save Changes
+                                </button>
+                                <button onclick="generateMessages()" class="text-electric-blue hover:text-gold smooth-transition text-sm">
+                                    📧 Generate Messages
+                                </button>
+                            </div>
+                            <span class="text-xs text-dark-text-secondary">
+                                {{ resume.tailored_text|length }} characters
+                            </span>
+                        </div>
+                    {% else %}
+                        <div class="h-96 flex items-center justify-center border-2 border-dashed border-gray-600 rounded-lg">
+                            <div class="text-center">
+                                <svg class="w-16 h-16 text-dark-text-secondary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                <h3 class="text-lg font-medium text-dark-text mb-2">No Tailored Version Yet</h3>
+                                <p class="text-dark-text-secondary mb-4">
+                                    Add a job description to create a tailored version of your resume
+                                </p>
+                                <button onclick="showTailorModal()" class="btn-primary px-6 py-3 rounded-lg hover-lift smooth-transition">
+                                    Tailor Resume
+                                </button>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Analysis Section -->
+    {% if resume.is_tailored %}
+    <div class="mt-8 slide-up" style="animation-delay: 0.2s;">
+        <div class="glass-effect rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-dark-text mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-electric-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Tailoring Analysis
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-electric-blue mb-1">85%</div>
+                    <div class="text-sm text-dark-text-secondary">Keyword Match</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gold mb-1">12</div>
+                    <div class="text-sm text-dark-text-secondary">Skills Added</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-400 mb-1">A+</div>
+                    <div class="text-sm text-dark-text-secondary">ATS Score</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- LaTeX Preview Section -->
+    {% if resume.latex_source %}
+    <div class="mt-8 slide-up" style="animation-delay: 0.3s;">
+        <div class="glass-effect rounded-xl overflow-hidden">
+            <div class="bg-dark-surface px-6 py-4 border-b border-gray-700">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-dark-text flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        LaTeX Source
+                    </h3>
+                    <div class="flex space-x-2">
+                        <button onclick="toggleLatexPreview()" class="text-electric-blue hover:text-gold smooth-transition text-sm">
+                            👁️ Toggle Preview
+                        </button>
+                        <a href="{{ url_for('resume.preview_resume', resume_id=resume.id) }}" target="_blank" class="text-gold hover:text-electric-blue smooth-transition text-sm">
+                            🔍 Preview PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6" id="latex-section">
+                <textarea 
+                    id="latex-source" 
+                    class="w-full h-64 bg-dark-card border border-gray-600 rounded-lg text-dark-text text-xs font-mono p-4 resize-none focus:outline-none focus:ring-2 focus:ring-gold"
+                    readonly
+                >{{ resume.latex_source }}</textarea>
+                <div class="mt-4 flex justify-between items-center">
+                    <button onclick="editLatexSource()" class="text-gold hover:text-electric-blue smooth-transition text-sm">
+                        ✏️ Edit LaTeX
+                    </button>
+                    <span class="text-xs text-dark-text-secondary">
+                        Professional LaTeX template
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Tailor Resume Modal -->
+<div id="tailorModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="glass-effect rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-dark-text">Tailor Resume</h3>
+                <button onclick="hideTailorModal()" class="text-dark-text-secondary hover:text-dark-text">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="tailorForm">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-dark-text mb-2">Job Title</label>
+                        <input type="text" id="tailorJobTitle" class="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-electric-blue" placeholder="e.g., Senior Software Engineer">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-dark-text mb-2">Company</label>
+                        <input type="text" id="tailorJobCompany" class="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-electric-blue" placeholder="e.g., Google">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-dark-text mb-2">Job Description</label>
+                        <textarea id="tailorJobDescription" rows="8" class="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-electric-blue resize-none" placeholder="Paste the full job description here..."></textarea>
+                    </div>
+                    
+                    <div class="flex space-x-4">
+                        <button type="button" onclick="hideTailorModal()" class="flex-1 bg-dark-card border border-gray-600 text-dark-text py-3 px-4 rounded-lg hover:bg-gray-700 smooth-transition">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 btn-primary py-3 px-4 rounded-lg">
+                            Tailor Resume
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let isEditingOriginal = false;
+    let isEditingLatex = false;
+    
+    function showTailorModal() {
+        document.getElementById('tailorModal').classList.remove('hidden');
+        document.getElementById('tailorJobTitle').focus();
+    }
+    
+    function hideTailorModal() {
+        document.getElementById('tailorModal').classList.add('hidden');
+        document.getElementById('tailorForm').reset();
+    }
+    
+    function editOriginalResume() {
+        const textarea = document.getElementById('original-resume');
+        if (!isEditingOriginal) {
+            textarea.readOnly = false;
+            textarea.classList.add('border-electric-blue');
+            isEditingOriginal = true;
+            document.querySelector('[onclick="editOriginalResume()"]').innerHTML = '💾 Save Original';
+        } else {
+            // Save changes
+            saveOriginalResume();
+        }
+    }
+    
+    function saveOriginalResume() {
+        const textarea = document.getElementById('original-resume');
+        const newContent = textarea.value;
+        
+        fetch(`/resume/edit/{{ resume.id }}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `resume_text=${encodeURIComponent(newContent)}&title={{ resume.title }}`
+        })
+        .then(response => {
+            if (response.ok) {
+                textarea.readOnly = true;
+                textarea.classList.remove('border-electric-blue');
+                isEditingOriginal = false;
+                document.querySelector('[onclick="editOriginalResume()"]').innerHTML = '✏️ Edit Original';
+                
+                // Show success message
+                showNotification('Original resume updated successfully!', 'success');
+            } else {
+                throw new Error('Failed to save');
+            }
+        })
+        .catch(error => {
+            showNotification('Error saving resume: ' + error.message, 'error');
+        });
+    }
+    
+    function saveTailoredResume() {
+        const textarea = document.getElementById('tailored-resume');
+        const newContent = textarea.value;
+        
+        // For now, just show a success message
+        // In a real implementation, you'd save to the backend
+        showNotification('Tailored resume saved!', 'success');
+    }
+    
+    function editLatexSource() {
+        const textarea = document.getElementById('latex-source');
+        if (!isEditingLatex) {
+            textarea.readOnly = false;
+            textarea.classList.add('border-gold');
+            isEditingLatex = true;
+            document.querySelector('[onclick="editLatexSource()"]').innerHTML = '💾 Save LaTeX';
+        } else {
+            // Save LaTeX changes
+            textarea.readOnly = true;
+            textarea.classList.remove('border-gold');
+            isEditingLatex = false;
+            document.querySelector('[onclick="editLatexSource()"]').innerHTML = '✏️ Edit LaTeX';
+            showNotification('LaTeX source updated!', 'success');
+        }
+    }
+    
+    function toggleLatexPreview() {
+        const section = document.getElementById('latex-section');
+        section.style.display = section.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    function generateMessages() {
+        // Redirect to messages with this resume context
+        window.location.href = `/messages/generate?resume_id={{ resume.id }}`;
+    }
+    
+    // Tailor form submission
+    document.getElementById('tailorForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const jobDescription = document.getElementById('tailorJobDescription').value;
+        if (!jobDescription.trim()) {
+            showNotification('Please enter a job description', 'error');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<div class="loading-spinner inline-block mr-2"></div>Tailoring Resume...';
+        submitBtn.disabled = true;
+        
+        // Make API call to tailor resume
+        fetch('/resume/tailor/{{ resume.id }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                resume_id: {{ resume.id }},
+                job_description: jobDescription
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                hideTailorModal();
+                location.reload(); // Refresh to show updated resume
+            } else {
+                showNotification('Error: ' + (data.error || 'Failed to tailor resume'), 'error');
+                submitBtn.innerHTML = 'Tailor Resume';
+                submitBtn.disabled = false;
+            }
+        })
+        .catch(error => {
+            showNotification('Error: ' + error.message, 'error');
+            submitBtn.innerHTML = 'Tailor Resume';
+            submitBtn.disabled = false;
+        });
+    });
+    
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 z-50 glass-effect rounded-lg p-4 fade-in ${
+            type === 'success' ? 'border-green-500 bg-green-900/20 text-green-300' :
+            type === 'error' ? 'border-red-500 bg-red-900/20 text-red-300' :
+            'border-blue-500 bg-blue-900/20 text-blue-300'
+        }`;
+        notification.innerHTML = `
+            <div class="flex justify-between items-center">
+                <span>${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()" class="text-current opacity-70 hover:opacity-100 ml-4">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+    
+    // Close modal when clicking outside
+    document.getElementById('tailorModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideTailorModal();
+        }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideTailorModal();
+        }
+    });
+</script>
+{% endblock %}

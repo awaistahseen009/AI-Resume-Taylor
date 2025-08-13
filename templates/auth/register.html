@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Resume Tailor{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center fade-in">
+            <h2 class="text-3xl font-bold gradient-text mb-2">
+                Create Your Account
+            </h2>
+            <p class="text-dark-text-secondary">
+                Join thousands of job seekers optimizing their resumes with AI
+            </p>
+        </div>
+        
+        <div class="glass-effect rounded-xl p-8 slide-up">
+            <form method="POST" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="first_name" class="block text-sm font-medium text-dark-text mb-2">
+                            First Name
+                        </label>
+                        <input 
+                            id="first_name" 
+                            name="first_name" 
+                            type="text" 
+                            class="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-electric-blue focus:border-transparent smooth-transition"
+                            placeholder="John"
+                        >
+                    </div>
+                    
+                    <div>
+                        <label for="last_name" class="block text-sm font-medium text-dark-text mb-2">
+                            Last Name
+                        </label>
+                        <input 
+                            id="last_name" 
+                            name="last_name" 
+                            type="text" 
+                            class="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-electric-blue focus:border-transparent smooth-transition"
+                            placeholder="Doe"
+                        >
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="username" class="block text-sm font-medium text-dark-text mb-2">
+                        Username
+                    </label>
+                    <input 
+                        id="username" 
+                        name="username" 
+                        type="text" 
+                        required 
+                        class="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-electric-blue focus:border-transparent smooth-transition"
+                        placeholder="Choose a username"
+                    >
+                </div>
+                
+                <div>
+                    <label for="email" class="block text-sm font-medium text-dark-text mb-2">
+                        Email Address
+                    </label>
+                    <input 
+                        id="email" 
+                        name="email" 
+                        type="email" 
+                        required 
+                        class="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-electric-blue focus:border-transparent smooth-transition"
+                        placeholder="john@example.com"
+                    >
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-dark-text mb-2">
+                        Password
+                    </label>
+                    <input 
+                        id="password" 
+                        name="password" 
+                        type="password" 
+                        required 
+                        class="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-electric-blue focus:border-transparent smooth-transition"
+                        placeholder="Create a strong password"
+                    >
+                    <div class="mt-2">
+                        <div class="flex items-center space-x-2 text-xs text-dark-text-secondary">
+                            <span id="length-check" class="flex items-center">
+                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                8+ characters
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="confirm_password" class="block text-sm font-medium text-dark-text mb-2">
+                        Confirm Password
+                    </label>
+                    <input 
+                        id="confirm_password" 
+                        name="confirm_password" 
+                        type="password" 
+                        required 
+                        class="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-electric-blue focus:border-transparent smooth-transition"
+                        placeholder="Confirm your password"
+                    >
+                </div>
+                
+                <div class="flex items-center">
+                    <input 
+                        id="terms" 
+                        name="terms" 
+                        type="checkbox" 
+                        required
+                        class="h-4 w-4 text-electric-blue bg-dark-card border-gray-600 rounded focus:ring-electric-blue focus:ring-2"
+                    >
+                    <label for="terms" class="ml-2 block text-sm text-dark-text-secondary">
+                        I agree to the 
+                        <a href="#" class="text-electric-blue hover:text-gold smooth-transition">Terms of Service</a> 
+                        and 
+                        <a href="#" class="text-electric-blue hover:text-gold smooth-transition">Privacy Policy</a>
+                    </label>
+                </div>
+                
+                <div>
+                    <button 
+                        type="submit" 
+                        class="w-full btn-primary py-3 px-4 rounded-lg text-lg font-semibold hover-lift smooth-transition"
+                    >
+                        Create Account
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <p class="text-dark-text-secondary">
+                        Already have an account? 
+                        <a href="{{ url_for('auth.login') }}" class="text-electric-blue hover:text-gold smooth-transition font-medium">
+                            Sign in here
+                        </a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Password validation
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const lengthCheck = document.getElementById('length-check');
+    
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        
+        // Check length
+        if (password.length >= 8) {
+            lengthCheck.classList.add('text-green-400');
+            lengthCheck.classList.remove('text-dark-text-secondary');
+        } else {
+            lengthCheck.classList.remove('text-green-400');
+            lengthCheck.classList.add('text-dark-text-secondary');
+        }
+    });
+    
+    // Confirm password validation
+    confirmPasswordInput.addEventListener('input', function() {
+        const password = passwordInput.value;
+        const confirmPassword = this.value;
+        
+        if (password && confirmPassword && password !== confirmPassword) {
+            this.setCustomValidity('Passwords do not match');
+            this.classList.add('border-red-500');
+        } else {
+            this.setCustomValidity('');
+            this.classList.remove('border-red-500');
+        }
+    });
+    
+    // Add loading state to form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const button = this.querySelector('button[type="submit"]');
+        button.innerHTML = '<div class="loading-spinner inline-block mr-2"></div>Creating Account...';
+        button.disabled = true;
+    });
+    
+    // Focus on first input
+    document.getElementById('first_name').focus();
+</script>
+{% endblock %}

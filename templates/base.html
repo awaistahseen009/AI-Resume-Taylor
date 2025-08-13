@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Resume Tailor - AI-Powered Resume Optimization{% endblock %}</title>
+    
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dark-bg': '#0a0a0a',
+                        'dark-surface': '#1a1a1a',
+                        'dark-card': '#2a2a2a',
+                        'gold': '#ffd700',
+                        'electric-blue': '#00bfff',
+                        'dark-text': '#e5e5e5',
+                        'dark-text-secondary': '#a0a0a0'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom CSS -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(42, 42, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+        }
+        
+        .gold-glow {
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+        
+        .smooth-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-5px);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #ffd700 0%, #00bfff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00bfff 0%, #0080ff 100%);
+            border: none;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0080ff 0%, #0060ff 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 191, 255, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
+            border: none;
+            color: #0a0a0a;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #ffb700 0%, #ff9700 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(0, 191, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #00bfff;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-dark-bg text-dark-text">
+    <!-- Navigation -->
+    <nav class="glass-effect border-b border-gray-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="{{ url_for('index') }}" class="text-2xl font-bold gradient-text">
+                        Resume Tailor
+                    </a>
+                </div>
+                
+                <!-- Navigation Links -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('dashboard') }}" class="text-dark-text hover:text-electric-blue smooth-transition px-3 py-2 rounded-md text-sm font-medium">
+                                Dashboard
+                            </a>
+                            <a href="{{ url_for('resume.upload') }}" class="text-dark-text hover:text-electric-blue smooth-transition px-3 py-2 rounded-md text-sm font-medium">
+                                Upload Resume
+                            </a>
+                            <a href="{{ url_for('jobs.list_jobs') }}" class="text-dark-text hover:text-electric-blue smooth-transition px-3 py-2 rounded-md text-sm font-medium">
+                                Jobs
+                            </a>
+                            <a href="{{ url_for('profile') }}" class="text-dark-text hover:text-electric-blue smooth-transition px-3 py-2 rounded-md text-sm font-medium">
+                                Profile
+                            </a>
+                            <a href="{{ url_for('auth.logout') }}" class="btn-secondary px-4 py-2 rounded-lg text-sm">
+                                Logout
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('auth.login') }}" class="text-dark-text hover:text-electric-blue smooth-transition px-3 py-2 rounded-md text-sm font-medium">
+                                Login
+                            </a>
+                            <a href="{{ url_for('auth.register') }}" class="btn-primary px-4 py-2 rounded-lg text-sm">
+                                Sign Up
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button type="button" class="text-dark-text hover:text-electric-blue" id="mobile-menu-button">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-dark-surface">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('dashboard') }}" class="text-dark-text hover:text-electric-blue block px-3 py-2 rounded-md text-base font-medium">Dashboard</a>
+                    <a href="{{ url_for('resume.upload') }}" class="text-dark-text hover:text-electric-blue block px-3 py-2 rounded-md text-base font-medium">Upload Resume</a>
+                    <a href="{{ url_for('jobs.list_jobs') }}" class="text-dark-text hover:text-electric-blue block px-3 py-2 rounded-md text-base font-medium">Jobs</a>
+
+                    <a href="{{ url_for('profile') }}" class="text-dark-text hover:text-electric-blue block px-3 py-2 rounded-md text-base font-medium">Profile</a>
+                    <a href="{{ url_for('auth.logout') }}" class="text-dark-text hover:text-electric-blue block px-3 py-2 rounded-md text-base font-medium">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="text-dark-text hover:text-electric-blue block px-3 py-2 rounded-md text-base font-medium">Login</a>
+                    <a href="{{ url_for('auth.register') }}" class="text-dark-text hover:text-electric-blue block px-3 py-2 rounded-md text-base font-medium">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} glass-effect rounded-lg p-4 mb-4 fade-in
+                        {% if category == 'error' %}border-red-500 bg-red-900/20 text-red-300
+                        {% elif category == 'success' %}border-green-500 bg-green-900/20 text-green-300
+                        {% elif category == 'warning' %}border-yellow-500 bg-yellow-900/20 text-yellow-300
+                        {% else %}border-blue-500 bg-blue-900/20 text-blue-300{% endif %}">
+                        <div class="flex justify-between items-center">
+                            <span>{{ message }}</span>
+                            <button type="button" class="text-current opacity-70 hover:opacity-100" onclick="this.parentElement.parentElement.remove()">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-dark-surface border-t border-gray-800 mt-20">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold gradient-text mb-4">Resume Tailor</h3>
+                    <p class="text-dark-text-secondary">
+                        AI-powered resume optimization to help you land your dream job.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-md font-medium text-dark-text mb-4">Features</h4>
+                    <ul class="space-y-2 text-dark-text-secondary">
+                        <li>AI Resume Tailoring</li>
+                        <li>Job Description Analysis</li>
+                        <li>Outreach Message Generation</li>
+                        <li>Professional PDF Export</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-md font-medium text-dark-text mb-4">Support</h4>
+                    <ul class="space-y-2 text-dark-text-secondary">
+                        <li><a href="#" class="hover:text-electric-blue smooth-transition">Help Center</a></li>
+                        <li><a href="#" class="hover:text-electric-blue smooth-transition">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-electric-blue smooth-transition">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-dark-text-secondary">
+                <p>&copy; 2024 Resume Tailor. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+        
+        // Auto-hide flash messages after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Resume Tailor{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center fade-in">
+            <h2 class="text-3xl font-bold gradient-text mb-2">
+                Welcome Back
+            </h2>
+            <p class="text-dark-text-secondary">
+                Sign in to your account to continue optimizing your resumes
+            </p>
+        </div>
+        
+        <div class="glass-effect rounded-xl p-8 slide-up">
+            <form method="POST" class="space-y-6">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-dark-text mb-2">
+                        Email Address
+                    </label>
+                    <input 
+                        id="email" 
+                        name="email" 
+                        type="email" 
+                        required 
+                        class="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-electric-blue focus:border-transparent smooth-transition"
+                        placeholder="Enter your email"
+                    >
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-dark-text mb-2">
+                        Password
+                    </label>
+                    <input 
+                        id="password" 
+                        name="password" 
+                        type="password" 
+                        required 
+                        class="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-electric-blue focus:border-transparent smooth-transition"
+                        placeholder="Enter your password"
+                    >
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input 
+                            id="remember" 
+                            name="remember" 
+                            type="checkbox" 
+                            class="h-4 w-4 text-electric-blue bg-dark-card border-gray-600 rounded focus:ring-electric-blue focus:ring-2"
+                        >
+                        <label for="remember" class="ml-2 block text-sm text-dark-text-secondary">
+                            Remember me
+                        </label>
+                    </div>
+                    
+                    <div class="text-sm">
+                        <a href="#" class="text-electric-blue hover:text-gold smooth-transition">
+                            Forgot your password?
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <button 
+                        type="submit" 
+                        class="w-full btn-primary py-3 px-4 rounded-lg text-lg font-semibold hover-lift smooth-transition"
+                    >
+                        Sign In
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <p class="text-dark-text-secondary">
+                        Don't have an account? 
+                        <a href="{{ url_for('auth.register') }}" class="text-electric-blue hover:text-gold smooth-transition font-medium">
+                            Sign up here
+                        </a>
+                    </p>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Demo Account Info -->
+        <div class="glass-effect rounded-lg p-4 text-center">
+            <p class="text-sm text-dark-text-secondary mb-2">
+                <strong class="text-gold">Demo Account:</strong>
+            </p>
+            <p class="text-xs text-dark-text-secondary">
+                Email: demo@resumetailor.com<br>
+                Password: demo123
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add loading state to form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const button = this.querySelector('button[type="submit"]');
+        button.innerHTML = '<div class="loading-spinner inline-block mr-2"></div>Signing In...';
+        button.disabled = true;
+    });
+    
+    // Focus on first input
+    document.getElementById('email').focus();
+</script>
+{% endblock %}

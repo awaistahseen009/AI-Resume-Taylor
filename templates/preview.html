@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Preview{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-white">Resume Preview</h1>
+            <div class="space-x-4">
+                <a href="{{ url_for('dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Back to Dashboard
+                </a>
+                <a href="{{ url_for('resume.download_resume', resume_id=resume.id) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Download PDF
+                </a>
+                <a href="{{ url_for('resume.cover_letters', resume_id=resume.id) }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Cover Letters
+                </a>
+            </div>
+        </div>
+
+        <!-- Resume Info -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-white mb-2">{{ resume.title }}</h2>
+            <p class="text-gray-300">
+                {% if resume.is_tailored %}
+                    <span class="inline-block bg-green-600 text-white px-2 py-1 rounded text-sm mr-2">Tailored</span>
+                {% endif %}
+                Last updated: {{ resume.updated_at.strftime('%B %d, %Y at %I:%M %p') if resume.updated_at and resume.updated_at.strftime else resume.updated_at }}
+            </p>
+        </div>
+
+        <!-- Preview Options -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <div class="flex space-x-4 mb-4">
+                <button onclick="showPreview('html')" id="htmlBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    HTML Preview
+                </button>
+                <button onclick="showPreview('latex')" id="latexBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    LaTeX Source
+                </button>
+                <button onclick="showPreview('text')" id="textBtn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Plain Text
+                </button>
+            </div>
+
+            <!-- HTML Preview -->
+            <div id="htmlPreview" class="preview-content">
+                <div class="bg-white text-black p-8 rounded-lg shadow-lg" style="min-height: 600px;">
+                    <div id="resumeHtmlContent">
+                        <!-- HTML content will be loaded here -->
+                        <div class="text-center">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                            <p class="mt-4">Loading preview...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LaTeX Source -->
+            <div id="latexPreview" class="preview-content hidden">
+                <pre class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-auto text-sm" style="max-height: 600px;"><code>{{ latex_source or 'No LaTeX source available' }}</code></pre>
+            </div>
+
+            <!-- Plain Text -->
+            <div id="textPreview" class="preview-content hidden">
+                <div class="bg-gray-900 text-white p-4 rounded-lg overflow-auto" style="max-height: 600px;">
+                    <pre class="whitespace-pre-wrap">{{ resume.tailored_text or resume.original_text }}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommended Skills from Similar Jobs -->
+        <div id="recommendedSkillsCard" class="bg-gray-800 rounded-lg p-6 mb-6 hidden">
+            <h2 class="text-xl font-semibold text-white mb-4">Recommended Skills from Similar Jobs</h2>
+            <div id="skillsContent" class="text-gray-300">
+                <p class="text-gray-400">Loading...</p>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="text-center">
+            <a href="{{ url_for('resume.edit_resume', resume_id=resume.id) }}" class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg transition-colors mr-4">
+                Edit Resume
+            </a>
+            <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors">
+                Print Preview
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function showPreview(type) {
+    // Hide all previews
+    document.querySelectorAll('.preview-content').forEach(el => el.classList.add('hidden'));
+    
+    // Reset button styles
+    document.querySelectorAll('button[id$="Btn"]').forEach(btn => {
+        btn.className = 'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors';
+    });
+    
+    // Show selected preview
+    document.getElementById(type + 'Preview').classList.remove('hidden');
+    document.getElementById(type + 'Btn').className = 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors';
+    
+    // Load HTML content if needed
+    if (type === 'html' && !document.getElementById('resumeHtmlContent').dataset.loaded) {
+        loadHtmlPreview();
+    }
+}
+
+function loadHtmlPreview() {
+    fetch(`/resume/preview-html/{{ resume.id }}`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('resumeHtmlContent').innerHTML = html;
+            document.getElementById('resumeHtmlContent').dataset.loaded = 'true';
+        })
+        .catch(error => {
+            document.getElementById('resumeHtmlContent').innerHTML = 
+                '<div class="text-center text-red-600"><p>Error loading preview</p></div>';
+        });
+}
+
+// Load HTML preview by default
+document.addEventListener('DOMContentLoaded', function() {
+    showPreview('html');
+});
+
+// Load recommended skills if available
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const res = await fetch('/resume/recommended-skills/{{ resume.id }}');
+        const data = await res.json();
+        if (data && data.success && data.recommended_skills && (data.recommended_skills.skills || []).length) {
+            const card = document.getElementById('recommendedSkillsCard');
+            const container = document.getElementById('skillsContent');
+            const skills = data.recommended_skills.skills;
+            const sources = data.recommended_skills.sources || [];
+            card.classList.remove('hidden');
+            const list = document.createElement('div');
+            list.className = 'space-y-2';
+            list.innerHTML = `
+                <div class="mb-3">
+                    <div class="flex flex-wrap gap-2">
+                        ${skills.map(s => `<span class=\"bg-gray-700 text-white text-sm px-2 py-1 rounded\">${s}</span>`).join('')}
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-white font-semibold mb-2">Sources</h3>
+                    <ul class="list-disc list-inside text-sm text-gray-400">
+                        ${sources.map(src => `<li><a class=\"text-blue-400 hover:underline\" href=\"${src.url}\" target=\"_blank\">${src.url}</a> — <span class=\"text-gray-500\">${src.snippet || ''}</span></li>`).join('')}
+                    </ul>
+                </div>`;
+            container.innerHTML = '';
+            container.appendChild(list);
+        }
+    } catch (e) { /* ignore */ }
+});
+</script>
+
+<style>
+@media print {
+    .container > div:not(#htmlPreview) {
+        display: none !important;
+    }
+    #htmlPreview .bg-white {
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}
+</style>
+{% endblock %}

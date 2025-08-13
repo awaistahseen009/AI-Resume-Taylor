@@ -1,0 +1,48 @@
+/* static/css/print.css */
+
+/* This stylesheet is applied ONLY for PDF generation / printing */
+@media print {
+
+    /* Hide elements not for printing */
+    .no-print, .no-print * {
+        display: none !important;
+    }
+
+    /* Reset borders and shadows that cause partitioning */
+    .section-container,
+    .section-content,
+    .header-container,
+    .contact-container,
+    .section-title {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0.5rem 0 !important; /* Adjust padding for print */
+    }
+
+    body {
+        background-color: #fff !important;
+        color: #000 !important;
+    }
+
+    /* Ensure the main resume container has a clean look */
+    .resume-container {
+        border: 1px solid #ccc !important; /* A single page-like border */
+        box-shadow: none !important;
+        padding: 1in !important; /* Standard margin for a document */
+        margin: 0 !important;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        color: #000 !important;
+    }
+
+    a {
+        color: #000 !important;
+        text-decoration: none !important;
+    }
+
+    /* Remove the blue line under section titles */
+    .section-title::after {
+        display: none !important;
+    }
+}

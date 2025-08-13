@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Resume - Resume Tailor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="fade-in">
+        <h1 class="text-3xl font-bold gradient-text mb-2">Upload Your Resume</h1>
+        <p class="text-dark-text-secondary mb-8">
+            Upload your resume in PDF, DOCX, or TXT to get started with AI optimization
+        </p>
+    </div>
+    
+    <div class="glass-effect rounded-xl p-8 slide-up">
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            <!-- Resume Title -->
+            <div>
+                <label for="title" class="block text-sm font-medium text-dark-text mb-2">
+                    Resume Title
+                </label>
+                <input 
+                    type="text" 
+                    id="title" 
+                    name="title" 
+                    class="w-full px-4 py-3 bg-dark-card border border-gray-600 rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-electric-blue focus:border-transparent smooth-transition"
+                    placeholder="e.g., Software Engineer Resume 2024"
+                >
+            </div>
+            
+            <!-- File Upload -->
+            <div>
+                <div class="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-electric-blue smooth-transition cursor-pointer" id="file-upload-area">
+                    <input type="file" id="resume_file" name="resume_file" accept=".pdf,.docx,.txt" class="hidden">
+                    <div id="file-upload-content">
+                        <svg class="w-12 h-12 text-dark-text-secondary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <h3 class="text-lg font-medium text-dark-text mb-2">Upload File</h3>
+                        <p class="text-dark-text-secondary mb-4">
+                            Drag and drop your resume or click to browse
+                        </p>
+                        <p class="text-sm text-dark-text-secondary">
+                            Supports PDF, DOCX, TXT (Max 16MB)
+                        </p>
+                    </div>
+                    <div id="file-selected-content" class="hidden">
+                        <svg class="w-12 h-12 text-green-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h3 class="text-lg font-medium text-green-400 mb-2">File Selected</h3>
+                        <p class="text-dark-text-secondary" id="selected-file-name"></p>
+                        <button type="button" onclick="clearFileSelection()" class="text-sm text-electric-blue hover:text-gold smooth-transition mt-2">
+                            Choose Different File
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            
+            
+            <!-- Submit Button -->
+            <div class="flex space-x-4">
+                <button 
+                    type="button" 
+                    onclick="window.history.back()" 
+                    class="flex-1 bg-dark-card border border-gray-600 text-dark-text py-3 px-4 rounded-lg hover:bg-gray-700 smooth-transition"
+                >
+                    Cancel
+                </button>
+                <button 
+                    type="submit" 
+                    id="submit-btn"
+                    class="flex-1 btn-primary py-3 px-4 rounded-lg font-semibold hover-lift smooth-transition"
+                >
+                    Upload Resume
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Tips Section -->
+    <div class="mt-8 glass-effect rounded-xl p-6">
+        <h3 class="text-lg font-semibold text-dark-text mb-4">💡 Tips for Best Results</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+                <h4 class="font-medium text-electric-blue">Content Tips:</h4>
+                <ul class="text-sm text-dark-text-secondary space-y-1">
+                    <li>• Include all work experience with dates</li>
+                    <li>• List technical and soft skills</li>
+                    <li>• Add education and certifications</li>
+                    <li>• Include contact information</li>
+                </ul>
+            </div>
+            <div class="space-y-2">
+                <h4 class="font-medium text-gold">Format Tips:</h4>
+                <ul class="text-sm text-dark-text-secondary space-y-1">
+                    <li>• Use clear section headers</li>
+                    <li>• Keep bullet points concise</li>
+                    <li>• Avoid special characters</li>
+                    <li>• Use standard date formats</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const fileUploadArea = document.getElementById('file-upload-area');
+    const fileInput = document.getElementById('resume_file');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    // File upload area click handler
+    fileUploadArea.addEventListener('click', () => {
+        fileInput.click();
+    });
+    
+    // Drag and drop handlers
+    fileUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.add('border-electric-blue', 'bg-electric-blue/5');
+    });
+    
+    fileUploadArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.remove('border-electric-blue', 'bg-electric-blue/5');
+    });
+    
+    fileUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.remove('border-electric-blue', 'bg-electric-blue/5');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFileSelection();
+        }
+    });
+    
+    // File input change handler
+    fileInput.addEventListener('change', handleFileSelection);
+    
+    function handleFileSelection() {
+        const file = fileInput.files[0];
+        if (file) {
+            // Show file selected state
+            document.getElementById('file-upload-content').classList.add('hidden');
+            document.getElementById('file-selected-content').classList.remove('hidden');
+            document.getElementById('selected-file-name').textContent = file.name;
+            
+            // Validate file
+            if (!validateFile(file)) {
+                clearFileSelection();
+                return;
+            }
+        }
+    }
+    
+    function clearFileSelection() {
+        fileInput.value = '';
+        document.getElementById('file-upload-content').classList.remove('hidden');
+        document.getElementById('file-selected-content').classList.add('hidden');
+    }
+    
+    function validateFile(file) {
+        const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+        const maxSize = 16 * 1024 * 1024; // 16MB
+        
+        if (!allowedTypes.includes(file.type)) {
+            alert('Please select a PDF, DOCX, or TXT file.');
+            return false;
+        }
+        
+        if (file.size > maxSize) {
+            alert('File size must be less than 16MB.');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const hasFile = fileInput.files.length > 0;
+        if (!hasFile) {
+            e.preventDefault();
+            alert('Please upload a resume file.');
+            return;
+        }
+        
+        // Show loading state
+        submitBtn.innerHTML = '<div class="loading-spinner inline-block mr-2"></div>Processing Resume...';
+        submitBtn.disabled = true;
+    });
+    
+</script>
+{% endblock %}
