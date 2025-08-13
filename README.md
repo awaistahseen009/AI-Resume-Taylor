@@ -17,6 +17,38 @@ A comprehensive web application that uses AI to tailor resumes for specific job 
 - **Vector Embeddings**: Store and search resumes using semantic similarity
 - **Profile Dashboard**: Comprehensive user statistics and account management
 
+## 🖼️ Application Highlights
+
+Here are some key screenshots showcasing the Resume Tailor application:
+
+<div align="center">
+
+### 📱 Dashboard Overview
+
+![Dashboard](images/1.PNG)
+
+### 🔐 User Authentication
+
+![Authentication](images/2.PNG)
+
+### 📄 Resume Management
+
+![Resume Management](images/3.PNG)
+
+### ✏️ AI-Powered Editor
+
+![AI Editor](images/4.PNG)
+
+### 📊 Profile Analytics
+
+![Profile Analytics](images/5.PNG)
+
+### 🎯 Job Matching
+
+![Job Matching](images/6.PNG)
+
+</div>
+
 ## Technology Stack
 
 - **Backend**: Flask (Python web framework)
